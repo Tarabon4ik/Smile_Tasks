@@ -1,0 +1,12 @@
+<?php
+/** @var \Smile\Checkout\Block\Form\CustomerLegalEntity $block */
+?>
+<div class="field legal entity optional">
+    <label class="label" for="legal_entity"><span><?= __("Legal Entity Type"); ?></span></label>
+    <select id="legal_entity" name="legal_entity" class="validate-select legal entity" >
+        <?php
+        foreach($block->getLegalEntityOptions() as $legalEntityOption) {
+            echo '<option value="'.$legalEntityOption['value'].'">'.$legalEntityOption['label'].'</option>';
+        } ?>
+    </select>
+</div>
