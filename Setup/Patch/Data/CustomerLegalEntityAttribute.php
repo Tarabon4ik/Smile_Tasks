@@ -24,17 +24,17 @@ class CustomerLegalEntityAttribute implements DataPatchInterface
     /**
      * @var CustomerSetupFactory
      */
-    private $customerSetupFactory;
+    protected $customerSetupFactory;
 
     /**
      * @var ModuleDataSetupInterface
      */
-    private $setup;
+    protected $setup;
 
     /**
      * @var Config
      */
-    private $eavConfig;
+    protected $eavConfig;
 
     /**
      * AccountPurposeCustomerAttribute constructor.
@@ -65,17 +65,20 @@ class CustomerLegalEntityAttribute implements DataPatchInterface
             'type' => 'int',
             'input' => 'select',
             'label' => 'Legal Entity Type',
+            'source' => \Magento\Eav\Model\Entity\Attribute\Source\Table::class,
             'required' => false,
-            'default' => 0,
+            'sort_order' => 110,
             'visible' => true,
             'user_defined' => true,
-            'system' => false,
-            'source' => \Smile\Checkout\Model\Customer\Attribute\LegalEntityOptions::class,
             'is_visible_in_grid' => true,
             'is_used_in_grid' => true,
             'is_filterable_in_grid' => true,
             'is_searchable_in_grid' => true,
-            'position' => 300
+            'system' => false,
+            'validate_rules' => '[]',
+            'position' => 300,
+            'admin_checkout' => 1,
+            'option' => ['values' => ['Juridical Person', 'Natural Person']],
         ]);
         $newAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, 'legal_entity_type');
         $newAttribute->addData([
