@@ -1,0 +1,12 @@
+<?php
+
+/** @var \Smile\Checkout\Block\Form\CustomerLegalEntity $block */
+?>
+<div class="field legal entity optional">
+    <label class="label" for="legal_entity"><span>Legal Entity Type</span></label>
+    <select name="legal_entity" id="legal_entity">
+        <option value="<?= $block->getNaturalPerson(); ?>"><?= $block->getNaturalPerson(); ?></option>
+        <option value="<?= $block->getJuridicalPerson(); ?>"><?= $block->getJuridicalPerson(); ?></option>
+    </select>
+</div>
+
