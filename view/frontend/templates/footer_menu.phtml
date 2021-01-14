@@ -1,0 +1,42 @@
+<div class="menu">
+    <div class="menu__column">
+        <h4><?php echo __('Contract Forms')?></h4>
+        <ul>
+            <li><a href="cgv"><?php echo __('CGV')?></a></li>
+            <li><a href="donnees"><?php echo __('Donnees')?></a></li>
+        </ul>
+    </div>
+</div>
+<script>
+    require(
+        [
+            'jquery',
+            'Magento_Ui/js/modal/modalToggle'
+        ],
+        function(
+            $,
+            modalToggle
+        ) {
+            var options = {
+            {
+                title: 'CGV',
+                type: 'popup',
+                responsive: true,
+                contentSelector: '#popup-map',
+                toggleEvent: 'click',
+                innerScroll: true
+            },
+            {
+                title: 'Donnees',
+                type: 'popup',
+                responsive: true,
+                contentSelector: '#popup-map',
+                toggleEvent: 'click',
+                innerScroll: true
+            }
+            };
+
+            return modalToggle(options);
+        }
+    );
+</script>
