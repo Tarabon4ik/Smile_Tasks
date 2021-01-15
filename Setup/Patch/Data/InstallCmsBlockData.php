@@ -139,31 +139,23 @@ class InstallCmsBlockData implements DataPatchInterface
             $cmsBlocks = $this->blockRepository->getList($criteria)->getItems();
 
             foreach ($cmsBlocks as $cmsBlock) {
-                $cmsBlocks[$cmsBlock->getId()] = $cmsBlock->getIdentifier();
+                $cmsBlocks[$cmsBlock->getIdentifier()] = $cmsBlock;
             }
 
             foreach ($rows as $row) {
                 $row = array_combine($header, $row);
 
-                if (in_array($row['identifier'], $cmsBlocks) == false) {
+                $model = isset($cmsBlocks[$row['identifier']]) ? $cmsBlocks[$row['identifier']] : null;
+                if (!$model) {
                     $model = $this->blockFactory->create();
-                    $model->setTitle($row['title'])
-                        ->setIdentifier($row['identifier'])
-                        ->setContent($row['content'])
-                        ->setCreationTime($row['creation_time'])
-                        ->setUpdateTime($this->dateTime->gmtDate())
-                        ->setIsActive($row['is_active']);
-                    $this->blockRepository->save($model);
-                } else {
-                    $model = $this->blockRepository->getById(array_search($row['identifier'], $cmsBlocks));
-                    $model->setTitle($row['title'])
-                        ->setIdentifier($row['identifier'])
-                        ->setContent($row['content'])
-                        ->setCreationTime($row['creation_time'])
-                        ->setUpdateTime($this->dateTime->gmtDate())
-                        ->setIsActive($row['is_active']);
-                    $this->blockRepository->save($model);
                 }
+                $model->setTitle($row['title'])
+                    ->setIdentifier($row['identifier'])
+                    ->setContent($row['content'])
+                    ->setCreationTime($row['creation_time'])
+                    ->setUpdateTime($this->dateTime->gmtDate())
+                    ->setIsActive($row['is_active']);
+                $this->blockRepository->save($model);
             }
 
             $this->moduleDataSetup->endSetup();
