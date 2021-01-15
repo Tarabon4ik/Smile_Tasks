@@ -119,38 +119,25 @@ class InstallCmsPageData implements DataPatchInterface
 
             foreach ($rows as $row) {
                 $row = array_combine($header, $row);
+
                 $pageIdentifier = $row['identifier'];
+                $pageId = $this->cmsPageResourceModel->checkIdentifier($pageIdentifier, Store::DISTRO_STORE_ID);
 
-                if ($this->cmsPageResourceModel->checkIdentifier($pageIdentifier, Store::DISTRO_STORE_ID) == null) {
+                $model = isset($pageId) ? $this->pageRepository->getById($pageId) : null;
+                if (!$model) {
                     $model = $this->pageFactory->create();
-
-                    $model->setIdentifier($row['identifier'])
-                        ->setTitle($row['title'])
-                        ->setPageLayout($row['page_layout'])
-                        ->setContentHeading($row['content_heading'])
-                        ->setContent($row['content'])
-                        ->setUpdateTime($this->dateTime->gmtDate())
-                        ->setIsActive($row['is_active'])
-                        ->setSortOrder($row['sort_order'])
-                        ->setCreationTime($row['creation_time']);
-
-                    $this->pageRepository->save($model);
-                } else {
-                    $pageId = $this->cmsPageResourceModel->checkIdentifier($pageIdentifier, Store::DISTRO_STORE_ID);
-                    $model = $this->pageRepository->getById($pageId);
-
-                    $model->setIdentifier($row['identifier'])
-                        ->setTitle($row['title'])
-                        ->setPageLayout($row['page_layout'])
-                        ->setContentHeading($row['content_heading'])
-                        ->setContent($row['content'])
-                        ->setCreationTime($row['creation_time'])
-                        ->setUpdateTime($this->dateTime->gmtDate())
-                        ->setIsActive($row['is_active'])
-                        ->setSortOrder($row['sort_order']);
-
-                    $this->pageRepository->save($model);
                 }
+                $model->setIdentifier($row['identifier'])
+                    ->setTitle($row['title'])
+                    ->setPageLayout($row['page_layout'])
+                    ->setContentHeading($row['content_heading'])
+                    ->setContent($row['content'])
+                    ->setUpdateTime($this->dateTime->gmtDate())
+                    ->setIsActive($row['is_active'])
+                    ->setSortOrder($row['sort_order'])
+                    ->setCreationTime($row['creation_time']);
+
+                $this->pageRepository->save($model);
             }
 
             $this->moduleDataSetup->endSetup();
