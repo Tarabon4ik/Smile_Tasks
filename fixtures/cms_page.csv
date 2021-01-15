@@ -48,4 +48,20 @@ POLITIQUE DE PROTECTION DES DONNÉES PERSONNELLES,1column,donnees,Politique De P
     </div>
 </div>
 ",2021-01-11 10:30:22,1,0
-Smile 404 Page,1column,smile_not_found,Smile 404 Page,"<dt>The page was not found((( Sorry.</dt>",2021-01-11 10:30:22,1,0
+404 Not Found,2columns-right,no-route,"Whoops, our bad...","<dl>
+<dt>Hi:) The page you requested was not found, and we have a fine guess why.</dt>
+<dd>
+<ul class=""disc"">
+<li>If you typed the URL directly, please make sure the spelling is correct.</li>
+<li>If you clicked on a link to get here, the link is outdated.</li>
+</ul></dd>
+</dl>
+<dl>
+<dt>What can you do?</dt>
+<dd>Have no fear, help is near! There are many ways you can get back on track with Magento Store.</dd>
+<dd>
+<ul class=""disc"">
+<li><a href=""#"" onclick=""history.go(-1); return false;"">Go back</a> to the previous page.</li>
+<li>Use the search bar at the top of the page to search for your products.</li>
+<li>Follow these links to get you back on track!<br /><a href=""{{store url=""""}}"">Store Home</a> <span class=""separator"">|</span> <a href=""{{store url=""customer/account""}}"">My Account</a></li></ul></dd></dl>
+",2021-01-14 09:19:31,1,0
