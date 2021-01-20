@@ -1,0 +1,8 @@
+attribute_code,backend_type,frontend_input,frontend_label,is_required,is_user_defined,is_unique,attribute_set_name,source_model,backend_model
+voltage,varchar,text,Voltage,0,0,0,Bass Amp,,
+outputs,varchar,text,Outputs,0,0,0,Bass Amp,,
+inputs,varchar,text,Inputs,0,0,0,Bass Amp,,
+reverb,int,boolean,Reverb,0,0,0,Bass Amp,Magento\Eav\Model\Entity\Attribute\Source\Boolean,
+channels,varchar,text,Channels,0,0,0,Bass Amp,,
+preamp_valves,varchar,text,Preamp valves,0,0,0,Bass Amp,,
+speaker_configuration,varchar,text,Speaker configuration,0,0,0,Bass Amp,,
