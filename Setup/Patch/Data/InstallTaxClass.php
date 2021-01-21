@@ -249,6 +249,46 @@ class InstallTaxClass implements DataPatchInterface
     }
 
     /**
+     * Get Product Tax Class Id by Name
+     *
+     * @param $productTaxClassName string
+     *
+     * @return int|null
+     */
+    public function getProductTaxClassIdByName($productTaxClassName)
+    {
+        $taxRateData = $this->readCsvData->readTaxClassCsv();
+
+        if (file_exists($taxRateData)) {
+            $rows = $this->csvReader->getData($taxRateData);
+            $header = array_shift($rows);
+
+            $taxClassNames = [];
+            foreach ($rows as $taxClassName) {
+                $taxClassName = array_combine($header, $taxClassName);
+                array_push($taxClassNames, $taxClassName[self::CLASS_NAME]);
+            }
+
+            $criteriaBuilder = $this->criteriaBuilderFactory->create();
+
+            $criteriaBuilder->addFilter(self::CLASS_NAME, $taxClassNames, 'in');
+            $criteriaBuilder->addFilter(self::CLASS_TYPE, self::TYPE_PRODUCT, 'eq');
+
+            $criteria = $criteriaBuilder->create();
+
+            $taxClasses = $this->taxClassRepository->getList($criteria)->getItems();
+
+            foreach ($taxClasses as $taxClass) {
+                $taxClasses[$taxClass->getClassId()] = $taxClass->getClassName();
+            }
+
+            $taxClassId = array_search($productTaxClassName, $taxClasses);
+        }
+
+        return $taxClassId;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function getDependencies()

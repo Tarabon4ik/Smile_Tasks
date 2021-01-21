@@ -95,7 +95,7 @@ class InstallTaxRule implements DataPatchInterface
      *
      * @var InstallTaxClass
      */
-    protected $taxRateClass;
+    protected $taxClass;
 
     /**
      * InstallCmsPageData constructor
@@ -108,7 +108,7 @@ class InstallTaxRule implements DataPatchInterface
      * @param TaxRuleRepositoryInterface $taxRuleRepository
      * @param TaxRuleFactory $taxRuleFactory
      * @param InstallTaxRate $taxRateData
-     * @param InstallTaxClass $taxRateClass
+     * @param InstallTaxClass $taxClass
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -119,7 +119,7 @@ class InstallTaxRule implements DataPatchInterface
         TaxRuleRepositoryInterface $taxRuleRepository,
         TaxRuleFactory $taxRuleFactory,
         InstallTaxRate $taxRateData,
-        InstallTaxClass $taxRateClass
+        InstallTaxClass $taxClass
     ) {
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->readCsvData = $readCsvData;
@@ -129,7 +129,7 @@ class InstallTaxRule implements DataPatchInterface
         $this->taxRuleFactory = $taxRuleFactory;
         $this->taxRuleRepository = $taxRuleRepository;
         $this->taxRateData = $taxRateData;
-        $this->taxRateClass = $taxRateClass;
+        $this->taxClass = $taxClass;
     }
 
     /**
@@ -179,8 +179,8 @@ class InstallTaxRule implements DataPatchInterface
 
                 $model->setCode($row[self::CODE])
                     ->setPriority($row[self::PRIORITY])
-                    ->setCustomerTaxClassIds($this->taxRateClass->getCustomerTaxClassIds())
-                    ->setProductTaxClassIds($this->taxRateClass->getProductTaxClassIds())
+                    ->setCustomerTaxClassIds($this->taxClass->getCustomerTaxClassIds())
+                    ->setProductTaxClassIds($this->taxClass->getProductTaxClassIds())
                     ->setTaxRateIds($this->taxRateData->getTaxRateIds());
 
                 $this->taxRuleRepository->save($model);
