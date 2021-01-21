@@ -1,4 +1,4 @@
-attribute_set_name,name,sku,price,final_price,qty,created_at,voltage,outputs,inputs,reverb,channels,preamp_valves,speaker_configuration
-Bass Amp,BassAmp 302-B,302M-BassAmp,1200,1100,120,2021-01-11 10:29:52,120 W,2,2,0,2,SMB-102,1x12
-Bass Amp,BassAmp 303-B,303M-BassAmp,1300,1200,130,2021-01-11 10:29:52,120 W,4,4,1,2,SMB-104,4x6
-Bass Amp,BassAmp 304-B,304M-BassAmp,1400,1300,140,2021-01-11 10:29:52,220 W,6,6,1,2,SMB-105,1x16
+attribute_set_name,name,sku,price,final_price,qty,created_at,voltage,outputs,inputs,reverb,channels,preamp_valves,speaker_configuration,class_name
+Bass Amp,BassAmp 302-B,302M-BassAmp,1200,1100,120,2021-01-11 10:29:52,120 W,2,2,0,2,SMB-102,1x12,UA Product
+Bass Amp,BassAmp 303-B,303M-BassAmp,1300,1200,130,2021-01-11 10:29:52,120 W,4,4,1,2,SMB-104,4x6,UA Product
+Bass Amp,BassAmp 304-B,304M-BassAmp,1400,1300,140,2021-01-11 10:29:52,220 W,6,6,1,2,SMB-105,1x16,UA Product

@@ -10,13 +10,12 @@
 
 namespace Smile\Attribute\Setup\Patch\Data;
 
-use Magento\Catalog\Api\Data\ProductTierPriceInterface;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Type;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ProductFactory;
-use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\Eav\Setup\EavSetup;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
@@ -27,7 +26,10 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
+use Magento\InventoryApi\Api\SourceItemRepositoryInterface;
 use Magento\Store\Model\Store;
+use Magento\Tax\Helper\Data as TaxDataHelper;
 use Smile\Attribute\Setup\Patch\ReadCsvData;
 
 /**
@@ -36,7 +38,7 @@ use Smile\Attribute\Setup\Patch\ReadCsvData;
 class InstallUniqueProduct implements DataPatchInterface
 {
     /**#@+
-     * Product attribute codes
+     * Custom product attribute codes
      */
     const VOLTAGE = 'voltage';
     const OUTPUTS = 'outputs';
@@ -45,6 +47,13 @@ class InstallUniqueProduct implements DataPatchInterface
     const CHANNELS = 'channels';
     const PREAMP_VALVES = 'preamp_valves';
     const SPEAKER_CONFIGURATION = 'speaker_configuration';
+    /**#@-*/
+
+    /**#@+
+     * Tax product attribute
+     */
+    const TAX_CLASS_ID = 'tax_class_id';
+    const TAX_CLASS_NAME = 'class_name';
     /**#@-*/
 
     /**#@+
@@ -123,6 +132,41 @@ class InstallUniqueProduct implements DataPatchInterface
     protected $state;
 
     /**
+     * Stock Interface
+     *
+     * @var StockInterfaceFactory
+     */
+    protected $stockInterface;
+
+    /**
+     * Source Item Interface Factory
+     *
+     * @var SourceItemInterfaceFactory
+     */
+    protected $sourceItemInterfaceFactory;
+
+    /**
+     * Source Item Repository
+     *
+     * @var SourceItemRepositoryInterface
+     */
+    protected $sourceItemRepository;
+
+    /**
+     * Tax Class Data
+     *
+     * @var InstallTaxClass
+     */
+    protected $taxClass;
+
+    /**
+     * Tax Data Helper
+     *
+     * @var TaxDataHelper
+     */
+    protected $taxDataHelper;
+
+    /**
      * InstallCmsPageData constructor
      *
      * @param SampleDataContext $sampleDataContext
@@ -134,6 +178,10 @@ class InstallUniqueProduct implements DataPatchInterface
      * @param EavSetup $eavSetup
      * @param DateTime $dateTime
      * @param State $state
+     * @param SourceItemInterfaceFactory $sourceItemInterfaceFactory
+     * @param SourceItemRepositoryInterface $sourceItemRepository
+     * @param InstallTaxClass $taxClass
+     * @param TaxDataHelper $taxDataHelper
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -144,7 +192,11 @@ class InstallUniqueProduct implements DataPatchInterface
         SearchCriteriaBuilderFactory $criteriaBuilderFactory,
         EavSetup $eavSetup,
         DateTime $dateTime,
-        State $state
+        State $state,
+        SourceItemInterfaceFactory $sourceItemInterfaceFactory,
+        SourceItemRepositoryInterface $sourceItemRepository,
+        InstallTaxClass $taxClass,
+        TaxDataHelper $taxDataHelper
     ) {
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->readCsvData = $readCsvData;
@@ -155,6 +207,10 @@ class InstallUniqueProduct implements DataPatchInterface
         $this->eavSetup = $eavSetup;
         $this->dateTime = $dateTime;
         $this->state = $state;
+        $this->sourceItemInterfaceFactory = $sourceItemInterfaceFactory;
+        $this->sourceItemRepository = $sourceItemRepository;
+        $this->taxClass = $taxClass;
+        $this->taxDataHelper = $taxDataHelper;
     }
 
     /**
@@ -198,6 +254,8 @@ class InstallUniqueProduct implements DataPatchInterface
                 $entityTypeId = $this->eavSetup->getEntityTypeId(Product::ENTITY);
                 $attributeSetId = $this->eavSetup->getAttributeSetId($entityTypeId, $row[self::ATTRIBUTE_SET_NAME]);
 
+                $productTaxClassId = $this->taxClass->getProductTaxClassIdByName($row[self::TAX_CLASS_NAME]);
+
                 $customAttributes = [
                     self::VOLTAGE => $row[self::VOLTAGE],
                     self::OUTPUTS => $row[self::OUTPUTS],
@@ -222,13 +280,12 @@ class InstallUniqueProduct implements DataPatchInterface
                     ->setStockData([
                         StockItemInterface::USE_CONFIG_MANAGE_STOCK => 0,
                         StockItemInterface::MANAGE_STOCK => 1,
-                        StockItemInterface::MIN_SALE_QTY => 1,
-                        StockItemInterface::MAX_SALE_QTY => 10,
                         StockItemInterface::IS_IN_STOCK => 1,
                         StockItemInterface::QTY => $row[self::QTY]
                     ])
                     ->setStoreId(Store::DEFAULT_STORE_ID)
-                    ->setCustomAttributes($customAttributes);
+                    ->setCustomAttributes($customAttributes)
+                    ->setTaxClassId($productTaxClassId ? $productTaxClassId : $this->taxDataHelper->getDefaultProductTaxClass());
 
                 $this->productRepository->save($model);
             }
