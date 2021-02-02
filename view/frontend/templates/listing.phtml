@@ -1,0 +1,21 @@
+<?php
+/** @var $block \Smile\Catalog\Block\Category\ListCategoryProducts */
+$productCollection = $block->getProductCollectionJson();
+?>
+<div id="product-listing" data-bind="scope:'product_list'">
+    <!-- ko template: getTemplate() --><!-- /ko -->
+    <script type="text/x-magento-init">
+    {
+        "#product-listing": {
+            "Magento_Ui/js/core/app": {
+               "components": {
+                    "product_list": {
+                        "component": "Smile_Catalog/js/view/product/listing",
+                        "productCollection": <?= $productCollection ?>
+                    }
+                }
+            }
+        }
+    }
+    </script>
+</div>
