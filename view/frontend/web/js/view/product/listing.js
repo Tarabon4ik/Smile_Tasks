@@ -1,4 +1,4 @@
-define(['jquery', 'jquery/ui', 'uiComponent', 'ko', 'mage/url', 'mage/storage'],
+define(['jquery', 'uiComponent', 'ko', 'mage/url', 'mage/storage'],
     function ($, Component, ko, urlBuilder, storage) {
         'use strict';
 
