@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KO product list template</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <thead>
+        <tr>
+            <th>Preview</th>
+            <th>Product Name</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody data-bind="foreach: productList">
+        <tr>
+            <td><img data-bind="attr: {src: src}" width="120" height="150" alt="Product Image"></td>
+            <td data-bind="text: name"></td>
+            <td data-bind="text: price"></td>
+            <td><a data-bind="attr: {href: url}">Buy</a></td>
+        </tr>
+        </tbody>
+    </table>
+</body>
+</html>
