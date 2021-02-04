@@ -1,0 +1,4 @@
+attribute_set_name,name,sku,price,final_price,qty,created_at
+Bass Amp,BassAmp 302-B,302M-BassAmp,1200,1100,120,2021-01-11 10:29:52
+Bass Amp,BassAmp 303-B,303M-BassAmp,1300,1200,130,2021-01-11 10:29:52
+Bass Amp,BassAmp 304-B,304M-BassAmp,1400,1300,140,2021-01-11 10:29:52
