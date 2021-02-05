@@ -1,37 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>KO product list template</title>
-    <style>
-        table, th, td {
-            border: 1px solid black;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 5px;
-            text-align: left;
-        }
-    </style>
-</head>
-<body>
-    <table>
-        <thead>
-        <tr>
-            <th>Preview</th>
-            <th>Product Name</th>
-            <th>Price</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody data-bind="foreach: productList">
-        <tr>
-            <td><img data-bind="attr: {src: src}" width="120" height="150" alt="Product Image"></td>
-            <td data-bind="text: name"></td>
-            <td data-bind="text: price"></td>
-            <td><a data-bind="attr: {href: url}">Buy</a></td>
-        </tr>
-        </tbody>
-    </table>
-</body>
-</html>
+<style>
+    #product-widget {
+        display: flex;
+    }
+
+    #product-table {
+        flex: 1;
+    }
+</style>
+
+<div id="product-widget" data-bind="foreach: productList">
+    <div id="product-table">
+        <table>
+            <tr>
+                <td><img data-bind="attr: {src: src}" width="120" height="150" alt="Product Image"></td>
+            </tr>
+            <tr>
+                <td data-bind="text: name"></td>
+            </tr>
+            <tr>
+                <td data-bind="text: price" style="font-weight: bold"></td>
+            </tr>
+            <tr>
+                <td>
+                    <a data-bind="attr: {href: url}" target="_blank">
+                        <button>Buy</button>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

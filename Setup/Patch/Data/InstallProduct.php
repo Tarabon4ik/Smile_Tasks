@@ -10,6 +10,7 @@
 
 namespace Smile\Catalog\Setup\Patch\Data;
 
+use Magento\Catalog\Api\CategoryLinkManagementInterface as CategoryLinkInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
@@ -30,6 +31,7 @@ use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
 use Magento\InventoryApi\Api\SourceItemRepositoryInterface;
 use Magento\Store\Model\Store;
 use Magento\Tax\Helper\Data as TaxDataHelper;
+use Smile\Catalog\Block\Category\ListCategoryProducts;
 use Smile\Catalog\Setup\Patch\ReadCsvData;
 
 /**
@@ -54,6 +56,7 @@ class InstallProduct implements DataPatchInterface
     const FINAL_PRICE = 'final_price';
     const QTY = 'qty';
     const CREATED_AT = 'created_at';
+    const CATEGORY = 'category';
     /**#@-*/
 
     /**
@@ -141,18 +144,25 @@ class InstallProduct implements DataPatchInterface
     protected $sourceItemRepository;
 
     /**
-     * Tax Class Data
-     *
-     * @var InstallTaxClass
-     */
-    protected $taxClass;
-
-    /**
      * Tax Data Helper
      *
      * @var TaxDataHelper
      */
     protected $taxDataHelper;
+
+    /**
+     * Category Link Interface
+     *
+     * @var CategoryLinkInterface
+     */
+    protected $categoryLinkInterface;
+
+    /**
+     * List Category Products Block
+     *
+     * @var ListCategoryProducts
+     */
+    protected $listCategoryProducts;
 
     /**
      * InstallCmsPageData constructor
@@ -168,8 +178,9 @@ class InstallProduct implements DataPatchInterface
      * @param State $state
      * @param SourceItemInterfaceFactory $sourceItemInterfaceFactory
      * @param SourceItemRepositoryInterface $sourceItemRepository
-     * @param InstallTaxClass $taxClass
      * @param TaxDataHelper $taxDataHelper
+     * @param CategoryLinkInterface $categoryLinkInterface
+     * @param ListCategoryProducts $listCategoryProducts
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -183,8 +194,9 @@ class InstallProduct implements DataPatchInterface
         State $state,
         SourceItemInterfaceFactory $sourceItemInterfaceFactory,
         SourceItemRepositoryInterface $sourceItemRepository,
-        InstallTaxClass $taxClass,
-        TaxDataHelper $taxDataHelper
+        TaxDataHelper $taxDataHelper,
+        CategoryLinkInterface $categoryLinkInterface,
+        ListCategoryProducts $listCategoryProducts
     ) {
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->readCsvData = $readCsvData;
@@ -197,8 +209,9 @@ class InstallProduct implements DataPatchInterface
         $this->state = $state;
         $this->sourceItemInterfaceFactory = $sourceItemInterfaceFactory;
         $this->sourceItemRepository = $sourceItemRepository;
-        $this->taxClass = $taxClass;
         $this->taxDataHelper = $taxDataHelper;
+        $this->categoryLinkInterface = $categoryLinkInterface;
+        $this->listCategoryProducts = $listCategoryProducts;
     }
 
     /**
@@ -214,7 +227,10 @@ class InstallProduct implements DataPatchInterface
             $rows = $this->csvReader->getData($fixtureData);
             $header = array_shift($rows);
 
-            $this->state->setAreaCode(Area::AREA_FRONTEND);
+            try {
+                $this->state->setAreaCode(Area::AREA_FRONTEND);
+            } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            }
 
             $productCodes = [];
             foreach ($rows as $productCode) {
@@ -262,6 +278,9 @@ class InstallProduct implements DataPatchInterface
                     ->setStoreId(Store::DEFAULT_STORE_ID);
 
                 $this->productRepository->save($model);
+
+                $categoryIds = $this->listCategoryProducts->getAllChildren(true, $this->listCategoryProducts->getCategoryIdByName($row[self::CATEGORY]));
+                $this->categoryLinkInterface->assignProductToCategories($row[self::SKU], $categoryIds);
             }
 
             $this->moduleDataSetup->endSetup();

@@ -11,6 +11,7 @@
 namespace Smile\Catalog\Setup\Patch\Data;
 
 use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Api\CategoryListInterface;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\CategoryFactory;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
@@ -31,6 +32,7 @@ use Magento\InventoryApi\Api\SourceItemRepositoryInterface;
 use Magento\Store\Model\Store;
 use Magento\Tax\Helper\Data as TaxDataHelper;
 use Smile\Catalog\Setup\Patch\ReadCsvData;
+use Smile\Catalog\Block\Category\ListCategoryProducts;
 
 /**
  * Class InstallUniqueProduct
@@ -53,6 +55,7 @@ class InstallCategory implements DataPatchInterface
     const CATEGORY_TYPE = 'category_type';
     const INCLUDE_IN_MENU = 'include_in_menu';
     const IS_ACTIVE = 'is_active';
+    const PARENT_CATEGORY_NAME = 'parent_category_name';
     /**#@-*/
 
     /**
@@ -68,6 +71,13 @@ class InstallCategory implements DataPatchInterface
      * @var CategoryRepositoryInterface
      */
     protected $categoryRepository;
+
+    /**
+     * Category List
+     *
+     * @var CategoryListInterface
+     */
+    protected $categoryList;
 
     /**
      * Eav Setup
@@ -140,18 +150,18 @@ class InstallCategory implements DataPatchInterface
     protected $sourceItemRepository;
 
     /**
-     * Tax Class Data
-     *
-     * @var InstallTaxClass
-     */
-    protected $taxClass;
-
-    /**
      * Tax Data Helper
      *
      * @var TaxDataHelper
      */
     protected $taxDataHelper;
+
+    /**
+     * List Category Products Block
+     *
+     * @var ListCategoryProducts
+     */
+    protected $listCategoryProducts;
 
     /**
      * InstallCmsPageData constructor
@@ -167,8 +177,9 @@ class InstallCategory implements DataPatchInterface
      * @param State $state
      * @param SourceItemInterfaceFactory $sourceItemInterfaceFactory
      * @param SourceItemRepositoryInterface $sourceItemRepository
-     * @param InstallTaxClass $taxClass
      * @param TaxDataHelper $taxDataHelper
+     * @param ListCategoryProducts $listCategoryProducts
+     * @param CategoryListInterface $categoryList
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -182,8 +193,9 @@ class InstallCategory implements DataPatchInterface
         State $state,
         SourceItemInterfaceFactory $sourceItemInterfaceFactory,
         SourceItemRepositoryInterface $sourceItemRepository,
-        InstallTaxClass $taxClass,
-        TaxDataHelper $taxDataHelper
+        TaxDataHelper $taxDataHelper,
+        ListCategoryProducts $listCategoryProducts,
+        CategoryListInterface $categoryList
     ) {
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->readCsvData = $readCsvData;
@@ -196,8 +208,9 @@ class InstallCategory implements DataPatchInterface
         $this->state = $state;
         $this->sourceItemInterfaceFactory = $sourceItemInterfaceFactory;
         $this->sourceItemRepository = $sourceItemRepository;
-        $this->taxClass = $taxClass;
         $this->taxDataHelper = $taxDataHelper;
+        $this->listCategoryProducts = $listCategoryProducts;
+        $this->categoryList = $categoryList;
     }
 
     /**
@@ -205,7 +218,7 @@ class InstallCategory implements DataPatchInterface
      */
     public function apply()
     {
-        $fixtureData = $this->readCsvData->readProductCsv();
+        $fixtureData = $this->readCsvData->readCategoryCsv();
 
         $this->moduleDataSetup->startSetup();
 
@@ -213,7 +226,10 @@ class InstallCategory implements DataPatchInterface
             $rows = $this->csvReader->getData($fixtureData);
             $header = array_shift($rows);
 
-            $this->state->setAreaCode(Area::AREA_FRONTEND);
+            try {
+                $this->state->setAreaCode(Area::AREA_FRONTEND);
+            } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            }
 
             $productCodes = [];
             foreach ($rows as $productCode) {
@@ -224,7 +240,7 @@ class InstallCategory implements DataPatchInterface
             $criteriaBuilder = $this->criteriaBuilderFactory->create();
             $criteriaBuilder->addFilter(self::NAME, $productCodes, 'in');
             $criteria = $criteriaBuilder->create();
-            $products = $this->categoryRepository->getList($criteria)->getItems();
+            $products = $this->categoryList->getList($criteria)->getItems();
 
             foreach ($products as $product) {
                 $products[$product->getSku()] = $product;
@@ -238,10 +254,18 @@ class InstallCategory implements DataPatchInterface
                     $model = $this->categoryFactory->create();
                 }
 
+                if ($row[self::CATEGORY_TYPE] == self::ROOT) {
+                    $parentId = Category::ROOT_CATEGORY_ID;
+                } elseif ($row[self::CATEGORY_TYPE] == self::SUB) {
+                    $parentId = Category::TREE_ROOT_ID;
+                } else {
+                    $parentId = $this->listCategoryProducts->getCategoryIdByName($row[self::PARENT_CATEGORY_NAME]);
+                }
+
                 $model->setName($row[self::NAME])
                     ->setIsActive($row[self::IS_ACTIVE])
                     ->setData(self::DESCRIPTION, $row[self::DESCRIPTION])
-                    ->setParentId($row[self::CATEGORY_TYPE] == self::ROOT ? Category::ROOT_CATEGORY_ID : Category::TREE_ROOT_ID)
+                    ->setParentId($parentId)
                     ->setStoreId(Store::DEFAULT_STORE_ID)
                     ->setIncludeInMenu($row[self::INCLUDE_IN_MENU])
                     ->setCreatedAt($row[self::CREATED_AT])
