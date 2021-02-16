@@ -1,0 +1,97 @@
+<?php
+/** @var $block \Smile\Catalog\Block\Category\ListCategoryProducts */
+
+$categoryId = (int)$this->getRequest()->getParam('id');
+?>
+
+<style>
+    #product-widget {
+        display: flex;
+    }
+
+    #product-table {
+        flex: 1;
+    }
+</style>
+
+<div id="product-listing" data-bind="scope:'product_list'">
+    <div id="product-widget" data-bind="foreach: { data: productList, as: 'product' }">
+        <div id="product-table">
+            <table>
+                <tr>
+                    <td><img data-bind="attr: {src: product.src}" width="120" height="150" alt="Product Image"></td>
+                </tr>
+                <tr>
+                    <td data-bind="text: product.name"></td>
+                </tr>
+                <tr>
+                    <td id="price" data-bind="text: product.price" style="font-weight: bold"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <a data-bind="attr: {href: product.url}">
+                            <button type="submit"
+                                    title="Buy"
+                                    class="action buy primary"
+                                    id="buy">
+                                <span>Buy</span>
+                            </button>
+                        </a>
+                    </td>
+                </tr>
+                    <td>
+                        <?php
+                            $productSku = '<p data-bind="text: product.sku"></p>';
+                            $_product = $block->getProductBySku($productSku);
+                            $postParams = $block->getAddToCartPostParams($_product);
+                        ?>
+                        <form data-role="tocart-form"
+                              data-product-sku="<?= $block->escapeHtmlAttr($_product->getSku()) ?>"
+                              action="<?= $block->escapeUrl($postParams['action']) ?>"
+                              method="post">
+                            <input type="hidden"
+                                   name="product"
+                                   value="<?= /* @noEscape */ $postParams['data']['product'] ?>">
+                            <input type="hidden" name="<?= /* @noEscape */ \Magento\Framework\App\Action\Action::PARAM_NAME_URL_ENCODED ?>"
+                                   value="<?= /* @noEscape */ $postParams['data'][\Magento\Framework\App\Action\Action::PARAM_NAME_URL_ENCODED] ?>">
+                            <?= $block->getBlockHtml('formkey') ?>
+                            <button type="submit"
+                                    title="<?= $block->escapeHtmlAttr(__('Add to Cart')) ?>"
+                                    class="action tocart primary">
+                                <span><?= $block->escapeHtml(__('Add to Cart')) ?></span>
+                            </button>
+                        </form>
+                    </td>
+                <tr>
+            </table>
+        </div>
+    </div>
+
+    <script type="text/x-magento-init">
+    {
+        "#product-listing": {
+            "Magento_Ui/js/core/app": {
+               "components": {
+                    "product_list": {
+                        "component": "Smile_Catalog/js/view/product/listing",
+                        "requestUrl": "<?= $block->getUrl('catalog/category/productListing'); ?>",
+                        "categoryId": <?= $categoryId; ?>
+                    }
+               }
+            }
+        }
+    }
+    </script>
+
+    <?php if (!$block->isRedirectToCartEnabled()) :?>
+        <script type="text/x-magento-init">
+        {
+            "[data-role=tocart-form], .form.map.checkout": {
+                "catalogAddToCart": {
+                    "product_sku": "<?= $block->escapeJs($_product->getSku()) ?>"
+                }
+            }
+        }
+        </script>
+    <?php endif; ?>
+</div>
