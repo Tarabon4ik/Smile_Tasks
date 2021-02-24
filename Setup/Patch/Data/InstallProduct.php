@@ -18,7 +18,10 @@ use Magento\Catalog\Model\Product\Type;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ProductFactory;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
+use Magento\Eav\Model\AttributeSetRepository;
 use Magento\Eav\Setup\EavSetup;
+use Magento\Framework\Api\FilterBuilder;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
@@ -27,12 +30,8 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Stdlib\DateTime\DateTime;
-use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
-use Magento\InventoryApi\Api\SourceItemRepositoryInterface;
-use Magento\InventoryApi\Api\StockRepositoryInterface;
 use Magento\Store\Model\Store;
-use Magento\Tax\Helper\Data as TaxDataHelper;
-use Smile\Catalog\Block\Category\ListCategoryProducts;
+use Smile\Catalog\Setup\Patch\Data\InstallCategory as InstallCategoryPatch;
 use Smile\Catalog\Setup\Patch\ReadCsvData;
 
 /**
@@ -45,6 +44,12 @@ class InstallProduct implements DataPatchInterface
      */
     const TAX_CLASS_ID = 'tax_class_id';
     const TAX_CLASS_NAME = 'class_name';
+    /**#@-*/
+
+    /**#@+
+     * Product Entity Type Default Attribute Set
+     */
+    const PRODUCT_DEFAULT_ATTRIBUTE_SET = 'Default';
     /**#@-*/
 
     /**#@+
@@ -131,27 +136,6 @@ class InstallProduct implements DataPatchInterface
     protected $stockInterface;
 
     /**
-     * Source Item Interface Factory
-     *
-     * @var SourceItemInterfaceFactory
-     */
-    protected $sourceItemInterfaceFactory;
-
-    /**
-     * Source Item Repository
-     *
-     * @var SourceItemRepositoryInterface
-     */
-    protected $sourceItemRepository;
-
-    /**
-     * Tax Data Helper
-     *
-     * @var TaxDataHelper
-     */
-    protected $taxDataHelper;
-
-    /**
      * Category Link Interface
      *
      * @var CategoryLinkInterface
@@ -159,11 +143,32 @@ class InstallProduct implements DataPatchInterface
     protected $categoryLinkInterface;
 
     /**
-     * List Category Products Block
+     * AttributeSetCollection
      *
-     * @var ListCategoryProducts
+     * @var AttributeSetRepository
      */
-    protected $listCategoryProducts;
+    protected $attributeSetRepository;
+
+    /**
+     * InstallCategoryPatch
+     *
+     * @var InstallCategoryPatch
+     */
+    protected $installCategoryPatch;
+
+    /**
+     * Search criteria builder
+     *
+     * @var SearchCriteriaBuilder
+     */
+    protected $searchCriteriaBuilder;
+
+    /**
+     * Filter builder
+     *
+     * @var FilterBuilder
+     */
+    protected $filterBuilder;
 
     /**
      * InstallCmsPageData constructor
@@ -177,11 +182,11 @@ class InstallProduct implements DataPatchInterface
      * @param EavSetup $eavSetup
      * @param DateTime $dateTime
      * @param State $state
-     * @param SourceItemInterfaceFactory $sourceItemInterfaceFactory
-     * @param SourceItemRepositoryInterface $sourceItemRepository
-     * @param TaxDataHelper $taxDataHelper
      * @param CategoryLinkInterface $categoryLinkInterface
-     * @param ListCategoryProducts $listCategoryProducts
+     * @param AttributeSetRepository $attributeSetRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param FilterBuilder $filterBuilder
+     * @param InstallCategoryPatch $installCategoryPatch
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -193,11 +198,11 @@ class InstallProduct implements DataPatchInterface
         EavSetup $eavSetup,
         DateTime $dateTime,
         State $state,
-        SourceItemInterfaceFactory $sourceItemInterfaceFactory,
-        SourceItemRepositoryInterface $sourceItemRepository,
-        TaxDataHelper $taxDataHelper,
         CategoryLinkInterface $categoryLinkInterface,
-        ListCategoryProducts $listCategoryProducts
+        AttributeSetRepository $attributeSetRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        FilterBuilder $filterBuilder,
+        InstallCategoryPatch $installCategoryPatch
     ) {
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->readCsvData = $readCsvData;
@@ -208,11 +213,11 @@ class InstallProduct implements DataPatchInterface
         $this->eavSetup = $eavSetup;
         $this->dateTime = $dateTime;
         $this->state = $state;
-        $this->sourceItemInterfaceFactory = $sourceItemInterfaceFactory;
-        $this->sourceItemRepository = $sourceItemRepository;
-        $this->taxDataHelper = $taxDataHelper;
         $this->categoryLinkInterface = $categoryLinkInterface;
-        $this->listCategoryProducts = $listCategoryProducts;
+        $this->attributeSetRepository = $attributeSetRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->filterBuilder = $filterBuilder;
+        $this->installCategoryPatch = $installCategoryPatch;
     }
 
     /**
@@ -244,6 +249,41 @@ class InstallProduct implements DataPatchInterface
             $criteria = $criteriaBuilder->create();
             $products = $this->productRepository->getList($criteria)->getItems();
 
+            $entityTypeId = $this->eavSetup->getEntityTypeId(Product::ENTITY);
+            $defaultAttributeSetId = $this->eavSetup->getAttributeSetId($entityTypeId, self::PRODUCT_DEFAULT_ATTRIBUTE_SET);
+
+            $attributeSetsToLoad = [];
+            foreach ($rows as $row) {
+                $row = array_combine($header, $row);
+                if ($row[self::ATTRIBUTE_SET_NAME] != self::PRODUCT_DEFAULT_ATTRIBUTE_SET) {
+                    $attributeSetsToLoad[] = $row[self::ATTRIBUTE_SET_NAME];
+                }
+            }
+
+            if (!empty($attributeSetsToLoad)) {
+                $attributeSetCollection = $this->getAttributeSetCollectionByNames($attributeSetsToLoad);
+
+                $attributeSetByName = [];
+                /** @var \Magento\Eav\Model\Entity\Attribute\Set $attributeSet */
+                foreach ($attributeSetCollection as $attributeSet) {
+                    $attributeSetByName[$attributeSet->getAttributeSetName()] = $attributeSet->getAttributeSetId();
+                }
+            }
+
+            $categoriesToLoad = [];
+            foreach ($rows as $row) {
+                $row = array_combine($header, $row);
+                $categoriesToLoad[] = $row[self::CATEGORY];
+            }
+
+            $categoryCollection = $this->installCategoryPatch->getCategoryCollectionByNames($categoriesToLoad);
+
+            $categoryIdByName = [];
+            /** @var \Magento\Catalog\Model\Category $categoryEntity */
+            foreach ($categoryCollection as $categoryEntity) {
+                $categoryIdByName[$categoryEntity->getName()] = $categoryEntity->getId();
+            }
+
             foreach ($products as $product) {
                 $products[$product->getSku()] = $product;
             }
@@ -256,11 +296,13 @@ class InstallProduct implements DataPatchInterface
                     $model = $this->productFactory->create();
                 }
 
-                $entityTypeId = $this->eavSetup->getEntityTypeId(Product::ENTITY);
-                $attributeSetId = $this->eavSetup->getAttributeSetId($entityTypeId, $row[self::ATTRIBUTE_SET_NAME]);
+                if ($row[self::ATTRIBUTE_SET_NAME] != self::PRODUCT_DEFAULT_ATTRIBUTE_SET) {
+                    $attributeSetId = $attributeSetByName[$row[self::ATTRIBUTE_SET_NAME]];
+                } else {
+                    $attributeSetId = $defaultAttributeSetId;
+                }
 
-                $model->setAttributeSetId($attributeSetId)
-                    ->setTypeId(Type::TYPE_SIMPLE)
+                $model->setTypeId(Type::TYPE_SIMPLE)
                     ->setName($row[self::NAME])
                     ->setCreatedAt($row[self::CREATED_AT])
                     ->setUpdatedAt($this->dateTime->gmtDate())
@@ -270,6 +312,7 @@ class InstallProduct implements DataPatchInterface
                     ->setVisibility(Visibility::VISIBILITY_BOTH)
                     ->setStatus(Status::STATUS_ENABLED)
                     ->setQty($row[self::QTY])
+                    ->setAttributeSetId($attributeSetId)
                     ->setStockData([
                         StockItemInterface::USE_CONFIG_MANAGE_STOCK => 0,
                         StockItemInterface::MANAGE_STOCK => 1,
@@ -280,12 +323,32 @@ class InstallProduct implements DataPatchInterface
 
                 $this->productRepository->save($model);
 
-                $categoryIds = $this->listCategoryProducts->getAllChildren(true, $this->listCategoryProducts->getCategoryIdByName($row[self::CATEGORY]));
-                $this->categoryLinkInterface->assignProductToCategories($row[self::SKU], $categoryIds);
+                $this->categoryLinkInterface->assignProductToCategories($row[self::SKU], [$categoryIdByName[$row[self::CATEGORY]]]);
             }
 
             $this->moduleDataSetup->endSetup();
         }
+    }
+
+    /**
+     * Get Attribute Set Collection By Names
+     *
+     * @param array $attributeSetNames
+     *
+     * @return \Magento\Eav\Api\Data\AttributeSetInterface[]
+     */
+    public function getAttributeSetCollectionByNames(array $attributeSetNames)
+    {
+        $attributeSetNames = array_unique($attributeSetNames);
+
+        $filter = $this->filterBuilder
+            ->setField('attribute_set_name')
+            ->setValue($attributeSetNames)
+            ->setConditionType('in')
+            ->create();
+        $searchCriteria = $this->searchCriteriaBuilder->addFilters([$filter])->create();
+
+        return $this->attributeSetRepository->getList($searchCriteria)->getItems();
     }
 
     /**
