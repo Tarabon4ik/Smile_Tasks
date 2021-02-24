@@ -15,7 +15,7 @@ use Magento\Checkout\Block\Checkout\LayoutProcessorInterface;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Element\Template;
 use Magento\Catalog\Block\Product\ListProduct;
-
+use Magento\Catalog\Api\CategoryListInterface;
 /**
  * Class ListCategoryProducts
  */
@@ -48,29 +48,37 @@ class ListCategoryProducts extends Template
     protected $listProduct;
 
     /**
+     * @var CategoryListInterface
+     */
+    protected $categoryList;
+
+    /**
      * ListCategoryProducts constructor
      *
      * @param Template\Context $context
      * @param Json $jsonHelper,
      * @param CategoryFactory $categoryFactory
+     * @param CategoryListInterface $categoryList
+     * @param ListProduct $listProduct
      * @param array $layoutProcessors
      * @param array $data
-     * @param ListProduct $listProduct
      */
     public function __construct(
         Template\Context $context,
         Json $jsonHelper,
         CategoryFactory $categoryFactory,
         ListProduct $listProduct,
+        CategoryListInterface $categoryList,
         array $layoutProcessors = [],
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->categoryFactory = $categoryFactory;
         $this->jsonHelper = $jsonHelper;
-        $this->jsLayout = isset($data['jsLayout']) && is_array($data['jsLayout']) ? $data['jsLayout'] : [];
+        $this->categoryList = $categoryList;
         $this->layoutProcessors = $layoutProcessors;
         $this->listProduct = $listProduct;
+        $this->jsLayout = isset($data['jsLayout']) && is_array($data['jsLayout']) ? $data['jsLayout'] : [];
     }
 
     /**

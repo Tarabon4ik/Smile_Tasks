@@ -12,6 +12,7 @@ define(
 
                 $.ajax({
                     url: config.requestUrl,
+                    type: 'POST',
                     dataType: 'json',
                     data: {
                         categoryId: config.categoryId,

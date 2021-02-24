@@ -10,15 +10,12 @@
 
 namespace Smile\Catalog\Setup\Patch\Data;
 
-use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\CategoryListInterface;
+use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\CategoryFactory;
-use Magento\Catalog\Model\Product\Attribute\Source\Status;
-use Magento\Catalog\Model\Product\Type;
-use Magento\Catalog\Model\Product\Visibility;
-use Magento\CatalogInventory\Api\Data\StockItemInterface;
-use Magento\Eav\Setup\EavSetup;
+use Magento\Framework\Api\FilterBuilder;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
@@ -27,12 +24,8 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Stdlib\DateTime\DateTime;
-use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
-use Magento\InventoryApi\Api\SourceItemRepositoryInterface;
 use Magento\Store\Model\Store;
-use Magento\Tax\Helper\Data as TaxDataHelper;
 use Smile\Catalog\Setup\Patch\ReadCsvData;
-use Smile\Catalog\Block\Category\ListCategoryProducts;
 
 /**
  * Class InstallCategory
@@ -80,13 +73,6 @@ class InstallCategory implements DataPatchInterface
     protected $categoryList;
 
     /**
-     * Eav Setup
-     *
-     * @var EavSetup
-     */
-    protected $eavSetup;
-
-    /**
      * Csv reader
      *
      * @var Csv
@@ -129,39 +115,18 @@ class InstallCategory implements DataPatchInterface
     protected $state;
 
     /**
-     * Stock Interface
+     * Search criteria builder
      *
-     * @var StockInterfaceFactory
+     * @var SearchCriteriaBuilder
      */
-    protected $stockInterface;
+    protected $searchCriteriaBuilder;
 
     /**
-     * Source Item Interface Factory
+     * Filter builder
      *
-     * @var SourceItemInterfaceFactory
+     * @var FilterBuilder
      */
-    protected $sourceItemInterfaceFactory;
-
-    /**
-     * Source Item Repository
-     *
-     * @var SourceItemRepositoryInterface
-     */
-    protected $sourceItemRepository;
-
-    /**
-     * Tax Data Helper
-     *
-     * @var TaxDataHelper
-     */
-    protected $taxDataHelper;
-
-    /**
-     * List Category Products Block
-     *
-     * @var ListCategoryProducts
-     */
-    protected $listCategoryProducts;
+    protected $filterBuilder;
 
     /**
      * InstallCmsPageData constructor
@@ -172,14 +137,11 @@ class InstallCategory implements DataPatchInterface
      * @param CategoryRepositoryInterface $categoryRepository
      * @param ReadCsvData $readCsvData
      * @param SearchCriteriaBuilderFactory $criteriaBuilderFactory
-     * @param EavSetup $eavSetup
      * @param DateTime $dateTime
      * @param State $state
-     * @param SourceItemInterfaceFactory $sourceItemInterfaceFactory
-     * @param SourceItemRepositoryInterface $sourceItemRepository
-     * @param TaxDataHelper $taxDataHelper
-     * @param ListCategoryProducts $listCategoryProducts
      * @param CategoryListInterface $categoryList
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param FilterBuilder $filterBuilder
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -188,14 +150,11 @@ class InstallCategory implements DataPatchInterface
         ModuleDataSetupInterface $moduleDataSetup,
         ReadCsvData $readCsvData,
         SearchCriteriaBuilderFactory $criteriaBuilderFactory,
-        EavSetup $eavSetup,
         DateTime $dateTime,
         State $state,
-        SourceItemInterfaceFactory $sourceItemInterfaceFactory,
-        SourceItemRepositoryInterface $sourceItemRepository,
-        TaxDataHelper $taxDataHelper,
-        ListCategoryProducts $listCategoryProducts,
-        CategoryListInterface $categoryList
+        CategoryListInterface $categoryList,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        FilterBuilder $filterBuilder
     ) {
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->readCsvData = $readCsvData;
@@ -203,14 +162,11 @@ class InstallCategory implements DataPatchInterface
         $this->categoryFactory = $categoryFactory;
         $this->categoryRepository = $categoryRepository;
         $this->criteriaBuilderFactory = $criteriaBuilderFactory;
-        $this->eavSetup = $eavSetup;
         $this->dateTime = $dateTime;
         $this->state = $state;
-        $this->sourceItemInterfaceFactory = $sourceItemInterfaceFactory;
-        $this->sourceItemRepository = $sourceItemRepository;
-        $this->taxDataHelper = $taxDataHelper;
-        $this->listCategoryProducts = $listCategoryProducts;
         $this->categoryList = $categoryList;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->filterBuilder = $filterBuilder;
     }
 
     /**
@@ -240,16 +196,32 @@ class InstallCategory implements DataPatchInterface
             $criteriaBuilder = $this->criteriaBuilderFactory->create();
             $criteriaBuilder->addFilter(self::NAME, $productCodes, 'in');
             $criteria = $criteriaBuilder->create();
-            $products = $this->categoryList->getList($criteria)->getItems();
+            $categories = $this->categoryList->getList($criteria)->getItems();
 
-            foreach ($products as $product) {
-                $products[$product->getSku()] = $product;
+            foreach ($categories as $category) {
+                $categories[$category->getName()] = $category;
+            }
+
+            $categoriesToLoad = [];
+            foreach ($rows as $row) {
+                $row = array_combine($header, $row);
+                if (!in_array($row[self::CATEGORY_TYPE], [self::ROOT, self::SUB])) {
+                    $categoriesToLoad[] = $row[self::PARENT_CATEGORY_NAME];
+                }
+            }
+
+            $categoryCollection = $this->getCategoryCollectionByNames($categoriesToLoad);
+
+            $categoryIdByName = [];
+            /** @var \Magento\Catalog\Model\Category $categoryEntity */
+            foreach ($categoryCollection as $categoryEntity) {
+                $categoryIdByName[$categoryEntity->getName()] = $categoryEntity->getCategoryId();
             }
 
             foreach ($rows as $row) {
                 $row = array_combine($header, $row);
 
-                $model = isset($products[$row[self::NAME]]) ? $products[$row[self::NAME]] : null;
+                $model = isset($categories[$row[self::NAME]]) ? $categories[$row[self::NAME]] : null;
                 if (!$model) {
                     $model = $this->categoryFactory->create();
                 }
@@ -259,7 +231,7 @@ class InstallCategory implements DataPatchInterface
                 } elseif ($row[self::CATEGORY_TYPE] == self::SUB) {
                     $parentId = Category::TREE_ROOT_ID;
                 } else {
-                    $parentId = $this->listCategoryProducts->getCategoryIdByName($row[self::PARENT_CATEGORY_NAME]);
+                    $parentId = $categoryIdByName[$row[self::PARENT_CATEGORY_NAME]];
                 }
 
                 $model->setName($row[self::NAME])
@@ -276,6 +248,27 @@ class InstallCategory implements DataPatchInterface
 
             $this->moduleDataSetup->endSetup();
         }
+    }
+
+    /**
+     * Get Category Collection By Names
+     *
+     * @param array $categoryNames
+     *
+     * @return \Magento\Catalog\Api\Data\CategoryInterface[]
+     */
+    public function getCategoryCollectionByNames(array $categoryNames)
+    {
+        $categoryNames = array_unique($categoryNames);
+
+        $filter = $this->filterBuilder
+            ->setField('name')
+            ->setValue($categoryNames)
+            ->setConditionType('in')
+            ->create();
+        $searchCriteria = $this->searchCriteriaBuilder->addFilters([$filter])->create();
+
+        return $this->categoryList->getList($searchCriteria)->getItems();
     }
 
     /**

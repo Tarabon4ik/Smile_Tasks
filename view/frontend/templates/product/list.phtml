@@ -6,25 +6,17 @@ $categoryId = (int)$this->getRequest()->getParam('id');
 $block->getToolbarHtml();
 $block->getAdditionalHtml();
 
-if ($block->getMode() == 'grid') {
-    $viewMode = 'grid';
-    $imageDisplayArea = 'category_page_grid';
-    $showDescription = false;
-    $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
-    $showWishlist = true;
-    $showCompare = true;
-    $imageWidth = 150;
-    $imageHeight = 120;
-} else {
-    $viewMode = 'list';
-    $imageDisplayArea = 'category_page_list';
-    $showDescription = true;
-    $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::FULL_VIEW;
-    $showWishlist = true;
-    $showCompare = true;
-    $imageWidth = 150;
-    $imageHeight = 120;
-}
+$viewMode = $block->getMode() == 'grid' ? 'grid' : 'list';
+$imageDisplayArea = $block->getMode() == 'grid' ? 'category_page_grid' : 'category_page_list';
+$showDescription = $block->getMode() == 'grid' ? false : true;
+$templateType = $block->getMode() == 'grid'
+    ? \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW
+    : \Magento\Catalog\Block\Product\ReviewRendererInterface::FULL_VIEW;
+$showWishlist = true;
+$showCompare = true;
+$imageWidth = 150;
+$imageHeight = 120;
+
 /**
  * Position for actions regarding image size changing in vde if needed
  */
@@ -62,7 +54,8 @@ $pos = $block->getPositioned();
                                     <!-- ko if: product.is_saleable == 1 -->
                                         <button type="button"
                                                 class="action tocart primary"
-                                                data-bind="attr: {'data-post': product.post_data}">
+                                                data-bind="attr: {'data-post': product.post_data}"
+                                                data-role="tocart-form">
                                             <span><?= $block->escapeHtml(__('Add to Cart')) ?></span>
                                         </button>
                                     <!-- /ko -->
@@ -122,5 +115,15 @@ $pos = $block->getPositioned();
         }
     }
     </script>
+
+    <?php if (!$block->isRedirectToCartEnabled()) :?>
+        <script type="text/x-magento-init">
+            {
+                "[data-role=tocart-form]": {
+                    "catalogAddToCart": {}
+                }
+            }
+            </script>
+    <?php endif; ?>
 </div>
 
