@@ -13,16 +13,15 @@ namespace Smile\Catalog\Controller\Category;
 use Magento\Catalog\Block\Product\Compare\ListCompare;
 use Magento\Catalog\Block\Product\ListProduct;
 use Magento\Catalog\Helper\Image;
+use Magento\Catalog\Helper\Product\Compare;
 use Magento\Catalog\Model\CategoryRepository;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultFactory;
-use Magento\Catalog\Helper\Product\Compare;
 use Magento\Framework\Data\Helper\PostHelper;
-use Magento\Catalog\Pricing\Price\FinalPrice;
 use Smile\Catalog\Model\Category\Product as CategoryProducts;
-use Magento\CatalogWidget\Block\Product\ProductsList as CatalogProductsList;
+use Smile\Catalog\ViewModel\Product\Listing as ProductListingViewModel;
 
 /**
  * Class ProductListing
@@ -74,9 +73,9 @@ class ProductListing extends Action
     protected $categoryProducts;
 
     /**
-     * @var CatalogProductsList
+     * @var ProductListingViewModel
      */
-    protected $catalogProductsList;
+    protected $productListing;
 
     /**
      * ProductListing constructor
@@ -90,7 +89,7 @@ class ProductListing extends Action
      * @param CategoryProducts $categoryProducts
      * @param \Magento\Framework\Serialize\Serializer\Json|null $serializer
      * @param PostHelper $postHelper
-     * @param CatalogProductsList $catalogProductsList
+     * @param ProductListingViewModel $productListing
      */
     public function __construct(
         Context $context,
@@ -101,7 +100,7 @@ class ProductListing extends Action
         Compare $compare,
         PostHelper $postHelper,
         CategoryProducts $categoryProducts,
-        CatalogProductsList $catalogProductsList,
+        ProductListingViewModel $productListing,
         \Magento\Framework\Serialize\Serializer\Json $serializer = null
     ) {
         parent::__construct($context);
@@ -112,7 +111,7 @@ class ProductListing extends Action
         $this->compare = $compare;
         $this->postHelper = $postHelper;
         $this->categoryProducts = $categoryProducts;
-        $this->catalogProductsList = $catalogProductsList;
+        $this->productListing = $productListing;
         $this->serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
             ->get(\Magento\Framework\Serialize\Serializer\Json::class);
     }
@@ -136,7 +135,6 @@ class ProductListing extends Action
 
             $productCollection = [];
             foreach ($this->categoryProducts->getProductCollection($category, $storeId) as $product) {
-
                 $productCollection[] = [
                     'product_id' => (int) $product->getEntityId(),
                     'sku' => $product->getSku(),
@@ -144,10 +142,9 @@ class ProductListing extends Action
                     'is_saleable' => $product->isSaleable(),
                     'is_available' => $product->isAvailable(),
                     'name' => $product->getName(),
-                    'price' => $this->catalogProductsList->getProductPriceHtml($product),
+                    'price' => $this->productListing->getProductPriceHtml($product),
                     'src' => $this->imageHelper->init($product, 'product_base_image')->getUrl(),
                     'url' => $product->getProductUrl(),
-                    'addtocart_url' => $this->listProduct->getAddToCartUrl($product),
                     'post_data' => $this->postHelper->getPostData($this->listProduct->getAddToCartUrl($product), ['product' => $product->getEntityId()]),
                     'add_to_wishlist_params' => $this->listCompare->getAddToWishlistParams($product),
                     'add_to_compare_params' => $this->compare->getPostDataParams($product),
