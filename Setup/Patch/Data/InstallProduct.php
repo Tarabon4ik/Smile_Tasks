@@ -31,6 +31,7 @@ use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Store\Model\Store;
+use Psr\Log\LoggerInterface;
 use Smile\Catalog\Setup\Patch\Data\InstallCategory as InstallCategoryPatch;
 use Smile\Catalog\Setup\Patch\ReadCsvData;
 
@@ -171,6 +172,13 @@ class InstallProduct implements DataPatchInterface
     protected $filterBuilder;
 
     /**
+     * Logger Interface
+     *
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * InstallCmsPageData constructor
      *
      * @param SampleDataContext $sampleDataContext
@@ -187,6 +195,7 @@ class InstallProduct implements DataPatchInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param FilterBuilder $filterBuilder
      * @param InstallCategoryPatch $installCategoryPatch
+     * @param LoggerInterface $logger
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -202,6 +211,7 @@ class InstallProduct implements DataPatchInterface
         AttributeSetRepository $attributeSetRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         FilterBuilder $filterBuilder,
+        LoggerInterface $logger,
         InstallCategoryPatch $installCategoryPatch
     ) {
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -218,6 +228,7 @@ class InstallProduct implements DataPatchInterface
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->filterBuilder = $filterBuilder;
         $this->installCategoryPatch = $installCategoryPatch;
+        $this->logger = $logger;
     }
 
     /**
@@ -236,6 +247,7 @@ class InstallProduct implements DataPatchInterface
             try {
                 $this->state->setAreaCode(Area::AREA_FRONTEND);
             } catch (\Magento\Framework\Exception\LocalizedException $e) {
+                $this->logger->error('Area Code Conflict', ['exception' => $e]);
             }
 
             $productCodes = [];
@@ -296,10 +308,9 @@ class InstallProduct implements DataPatchInterface
                     $model = $this->productFactory->create();
                 }
 
+                $attributeSetId = $defaultAttributeSetId;
                 if ($row[self::ATTRIBUTE_SET_NAME] != self::PRODUCT_DEFAULT_ATTRIBUTE_SET) {
                     $attributeSetId = $attributeSetByName[$row[self::ATTRIBUTE_SET_NAME]];
-                } else {
-                    $attributeSetId = $defaultAttributeSetId;
                 }
 
                 $model->setTypeId(Type::TYPE_SIMPLE)

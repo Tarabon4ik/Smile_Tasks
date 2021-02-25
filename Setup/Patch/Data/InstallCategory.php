@@ -25,6 +25,7 @@ use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Store\Model\Store;
+use Psr\Log\LoggerInterface;
 use Smile\Catalog\Setup\Patch\ReadCsvData;
 
 /**
@@ -129,6 +130,13 @@ class InstallCategory implements DataPatchInterface
     protected $filterBuilder;
 
     /**
+     * Logger Interface
+     *
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * InstallCmsPageData constructor
      *
      * @param SampleDataContext $sampleDataContext
@@ -142,6 +150,7 @@ class InstallCategory implements DataPatchInterface
      * @param CategoryListInterface $categoryList
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param FilterBuilder $filterBuilder
+     * @param LoggerInterface $logger
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -154,7 +163,8 @@ class InstallCategory implements DataPatchInterface
         State $state,
         CategoryListInterface $categoryList,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        FilterBuilder $filterBuilder
+        FilterBuilder $filterBuilder,
+        LoggerInterface $logger
     ) {
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->readCsvData = $readCsvData;
@@ -167,6 +177,7 @@ class InstallCategory implements DataPatchInterface
         $this->categoryList = $categoryList;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->filterBuilder = $filterBuilder;
+        $this->logger = $logger;
     }
 
     /**
@@ -185,6 +196,7 @@ class InstallCategory implements DataPatchInterface
             try {
                 $this->state->setAreaCode(Area::AREA_FRONTEND);
             } catch (\Magento\Framework\Exception\LocalizedException $e) {
+                $this->logger->error('Area Code Conflict', ['exception' => $e]);
             }
 
             $productCodes = [];
