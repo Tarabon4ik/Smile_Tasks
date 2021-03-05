@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Smile\Manifestation\Api\Data\ManifestationInterface"
+                type="Smile\Manifestation\Model\Manifestation"/>
+    <preference for="Smile\Manifestation\Api\ManifestationRepositoryInterface"
+                type="Smile\Manifestation\Model\ManifestationRepository"/>
+    <preference for="Smile\Manifestation\Api\Data\PlaceInterface"
+                type="Smile\Manifestation\Model\Place"/>
+    <preference for="Smile\Manifestation\Api\PlaceRepositoryInterface"
+                type="Smile\Manifestation\Model\PlaceRepository"/>
+    <preference for="Smile\Manifestation\Api\Data\PlaceSearchResultsInterface"
+                type="Smile\Manifestation\Model\PlaceSearchResults" />
+    <preference for="Smile\Manifestation\Api\Data\ManifestationSearchResultsInterface"
+                type="Smile\Manifestation\Model\ManifestationSearchResults" />
+    <preference for="Smile\Manifestation\Api\Data\ManifestationLinkInterface"
+                type="Smile\Manifestation\Model\ManifestationLink"/>
+    <preference for="Smile\Manifestation\Api\ManifestationLinkRepositoryInterface"
+                type="Smile\Manifestation\Model\ManifestationLinkRepository"/>
+</config>

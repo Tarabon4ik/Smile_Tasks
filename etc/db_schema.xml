@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="eav_manifestation_entity" resource="default" engine="innodb" comment="Manifestation Data Table">
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Manifestation ID"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Title"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Description"/>
+        <column xsi:type="text" name="meta_title" nullable="true" comment="Meta Title"/>
+        <column xsi:type="text" name="meta_description" nullable="true" comment="Meta Description"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Creation Time"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Update Time"/>
+        <column xsi:type="datetime" name="start_date" on_update="true" nullable="false"
+                comment="Start Date"/>
+        <column xsi:type="datetime" name="end_date" on_update="true" nullable="false"
+                comment="End Date"/>
+        <column xsi:type="smallint" name="need_electricity" padding="5" unsigned="true" nullable="false" identity="false"
+                default="1" comment="Need Electricity"/>
+        <column xsi:type="smallint" name="need_water" padding="5" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Need Water"/>
+        <column xsi:type="varchar" name="image" nullable="true" length="255" comment="Image"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+    </table>
+
+    <table name="eav_place_entity" resource="default" engine="innodb" comment="Place Data Table">
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Place ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Name"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Description"/>
+        <column xsi:type="text" name="location" nullable="false" comment="Location"/>
+        <column xsi:type="varchar" name="longitude" nullable="true" length="255" comment="Longitude"/>
+        <column xsi:type="varchar" name="latitude" nullable="true" length="255" comment="Latitude"/>
+        <column xsi:type="varchar" name="image" nullable="true" length="255" comment="Image"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+    </table>
+
+    <table name="eav_manifestation_link" resource="default" engine="innodb"
+           comment="Manifestation/Place Link Table">
+        <column xsi:type="int" name="link_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Link ID"/>
+        <column xsi:type="int" name="manifestation_id" padding="10" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Manifestation ID"/>
+        <column xsi:type="int" name="place_id" padding="10" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Place ID"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="link_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="MANIFESTATION_LINK_MANIFESTATION_ID_PLACE_ID">
+            <column name="manifestation_id"/>
+            <column name="place_id"/>
+        </constraint>
+        <index referenceId="MANIFESTATION_LINK_MANIFESTATION_ID" indexType="btree">
+            <column name="manifestation_id"/>
+        </index>
+        <index referenceId="MANIFESTATION_LINK_PLACE_ID" indexType="btree">
+            <column name="place_id"/>
+        </index>
+    </table>
+</schema>
