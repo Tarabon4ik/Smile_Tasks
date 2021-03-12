@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Smile_Manifestation::menu"
+             title="Manifestation"
+             module="Smile_Manifestation"
+             resource="Smile_Manifestation::manifestation"
+             translate="title toolTip"
+             sortOrder="35"
+             toolTip="Manifestation Menu" />
+        <add id="Smile_Manifestation::manifestation"
+             title="Manifestation Management Menu"
+             module="Smile_Manifestation"
+             resource="Smile_Manifestation::menu"
+             translate="title"
+             parent="Smile_Manifestation::menu"
+             action="manifestation/manifestation/index" />
+    </menu>
+</config>
