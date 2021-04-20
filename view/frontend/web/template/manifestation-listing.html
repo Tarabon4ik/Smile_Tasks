@@ -1,0 +1,64 @@
+<li id="manifestation_listing_step" data-bind="fadeVisible: isVisible">
+    <div id="manifestation-listing-step"
+         class="step-content"
+         data-role="content">
+
+<!--        <each args="getRegion('manifestation-list')" render="" />-->
+<!--        <each args="getRegion('manifestation-list-additional')" render="" />-->
+
+<!--        &lt;!&ndash; Manifestation form pop up &ndash;&gt;-->
+<!--        <div class="new-address-popup">'-->
+<!--            <button type="button"-->
+<!--                    class="action action-show-popup"-->
+<!--                    click="showFormPopUp"-->
+<!--                    visible="!isTicketBuyed()">-->
+<!--                <span translate="'Manifestation Details'" />-->
+<!--            </button>-->
+<!--        </div>-->
+<!--        <div id="opc-manifestation-details"-->
+<!--             visible="isFormPopUpVisible()"-->
+<!--             render="manifestationDetailsTemplate" />-->
+
+<!--        <each args="getRegion('before-form')" render="" />-->
+
+        <div class="block widget block-new-products grid">
+            <div class="block-title">
+                <strong role="heading" aria-level="2"><span><!-- ko i18n: 'Manifestations'--><!-- /ko --></span></strong>
+            </div>
+            <div class="block-content">
+                <div class="products-grid">
+                    <ol class="product-items widget-new-grid">
+                        <li class="product-item" data-bind="foreach: manifestationList">
+                            <div class="product-item-info">
+                                <a data-bind="attr: {href: url}"
+                                   class="product-item-photo">
+                                    <img data-bind="attr: {src: src}" alt="Manifestation Image">
+                                </a>
+                                <div class="product-item-details">
+                                    <strong class="product-item-name">
+                                        <a data-bind="attr: {href: url, title: title}"
+                                           class="product-item-link">
+                                            <span data-bind="attr: {text: title}"></span>
+                                        </a>
+                                    </strong>
+                                </div>
+                                <form data-bind="submit: $parent.navigateToNextStep" novalidate="novalidate">
+                                    <div class="actions-toolbar">
+                                        <div class="primary">
+                                            <button data-role="opc-continue" type="submit" class="button action continue primary">
+                                                <span><!-- ko i18n: 'Buy Ticket'--><!-- /ko --></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div class="prompt-modal-content">
+
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</li>

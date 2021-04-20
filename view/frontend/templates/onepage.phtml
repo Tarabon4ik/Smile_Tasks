@@ -1,0 +1,36 @@
+<?php
+
+/** @var $block \Smile\Onepage\Block\Onepage */
+?>
+<div id="manifestation" data-bind="scope:'manifestation'" class="manifestation-container">
+    <div id="manifestation-loader" data-role="manifestation-loader" class="loading-mask" data-mage-init='{"manifestationLoader": {}}'>
+        <div class="loader">
+            <img src="<?= $block->escapeUrl($block->getViewFileUrl('images/loader-1.gif')) ?>"
+                 alt="<?= $block->escapeHtmlAttr(__('Loading...')) ?>"
+                 style="position: absolute;">
+        </div>
+    </div>
+    <!-- ko template: getTemplate() --><!-- /ko -->
+    <script type="text/x-magento-init">
+        {
+            "#manifestation": {
+                "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+            }
+        }
+    </script>
+    <script>
+        window.manifestationConfig = <?= /* @noEscape */ $block->getSerializedManifestationOnepageConfig() ?>;
+        // Create aliases for customer.js model from customer module
+        window.isCustomerLoggedIn = window.manifestationConfig.isCustomerLoggedIn;
+        window.customerData = window.manifestationConfig.customerData;
+    </script>
+    <script>
+        require([
+            'mage/url',
+            'Magento_Ui/js/block-loader'
+        ], function(url, blockLoader) {
+            blockLoader("<?= $block->escapeJs($block->escapeUrl($block->getViewFileUrl('images/loader-1.gif'))) ?>");
+            return url.setBaseUrl('<?= $block->escapeJs($block->escapeUrl($block->getBaseUrl())) ?>');
+        })
+    </script>
+</div>

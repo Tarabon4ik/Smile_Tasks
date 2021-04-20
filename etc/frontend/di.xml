@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Url\SecurityInfo">
+        <arguments>
+            <argument name="secureUrlList" xsi:type="array">
+                <item name="onepage_index" xsi:type="string">/onepage</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Layout">
+        <plugin name="manifestation-session-depersonalize"
+                type="Smile\Onepage\Model\Layout\DepersonalizePlugin" sortOrder="20"/>
+    </type>
+    <type name="Smile\Onepage\Block\Onepage">
+        <arguments>
+            <argument name="layoutProcessors" xsi:type="array">
+                <item name="manifestationLayoutProcessor" xsi:type="object">Smile\Onepage\Block\Manifestation\LayoutProcessor</item>
+            </argument>
+            <argument name="serializer" xsi:type="object">Magento\Framework\Serialize\Serializer\JsonHexTag</argument>
+        </arguments>
+    </type>
+    <type name="Smile\Onepage\Model\CompositeConfigProvider">
+        <arguments>
+            <argument name="configProviders" xsi:type="array">
+                <item name="manifestation_onepage_default_config_provider" xsi:type="object">Smile\Onepage\Model\DefaultConfigProvider</item>
+                <item name="manifestation_onepage_config_provider" xsi:type="object">Smile\Onepage\Ui\ConfigProvider</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

@@ -1,0 +1,24 @@
+<li id="place" class="manifestation-place" data-bind="fadeVisible: isVisible">
+    <div class="step-title" translate="'Place'" data-role="title"/>
+
+    <div id="manifestation-place-step"
+         class="step-content"
+         data-role="content">
+
+        <form id='co-place-form' class="form" data-bind="setPlaceData" novalidate="novalidate">
+            <div id='place-form' class="fieldset address">
+                <!-- ko foreach: getRegion('additional-fieldsets') -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+
+            <div class="actions-toolbar" id="place-buttons-container">
+                <div class="primary">
+                    <button data-role="opc-continue" type="submit" class="button action continue primary">
+                        <span><!-- ko i18n: 'Next'--><!-- /ko --></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</li>

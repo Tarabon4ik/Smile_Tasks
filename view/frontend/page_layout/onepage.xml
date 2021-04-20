@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_layout.xsd">
+    <update handle="empty"/>
+    <referenceContainer name="page.wrapper">
+        <container name="onepage.header.container" as="onepage_header_container" label="Onepage Header Container" htmlTag="header" htmlClass="page-header" before="main.content">
+            <container name="onepage.header.wrapper" label="Onepage Header" as="onepage_header_wrapper" htmlTag="div" htmlClass="header content"/>
+        </container>
+    </referenceContainer>
+    <move element="logo" destination="onepage.header.wrapper"/>
+</layout>

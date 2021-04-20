@@ -1,0 +1,11 @@
+<form class="form form-manifestation-details" id="co-manifestation-details-form" data-bind="attr: {'data-hasrequired': $t('* Required Fields')}">
+    <!-- ko foreach: getRegion('before-fields') -->
+    <!-- ko template: getTemplate() --><!-- /ko -->
+    <!--/ko-->
+    <div id="manifestation-details-form" class="fieldset manifestation-details">
+        <!-- ko foreach: getRegion('additional-fieldsets') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <h1>TEST</h1>
+    </div>
+</form>
