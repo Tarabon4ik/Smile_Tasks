@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <manifestation>
+            <onepage>
+                <onepage_manifestation_enabled>1</onepage_manifestation_enabled>
+                <guest_onepage>1</guest_onepage>
+                <customer_must_be_logged>0</customer_must_be_logged>
+                <autocomplete_on_storefront>1</autocomplete_on_storefront>
+                <backend_module>Smile_Manifestation</backend_module>
+            </onepage>
+        </manifestation>
+    </default>
+</config>

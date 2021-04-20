@@ -1,0 +1,49 @@
+<div class="field manifestations">
+    <div class="control">
+        <div class="manifestation-items">
+            <!-- ko foreach: { data: elems, as: 'element' } -->
+            <!-- ko template: element.getTemplate() --><!-- /ko -->
+            <!-- /ko -->
+
+            <ol class="products list items product-items" id="product-listing">
+                <li class="item product product-item" data-bind="foreach: { data: manifestationList, as: 'manifestation' }">
+                    <div class="product-item-info" data-container="product-list">
+                        <a data-bind="attr: {href: manifestation.url}"
+                           class="product photo product-item-photo"
+                           tabindex="-1">
+                            <img data-bind="attr: {src: manifestation.src}" alt="Product Image">
+                        </a>
+                        <div class="product details product-item-details">
+                            <strong class="product name product-item-name">
+                                <a class="product-item-link"
+                                   data-bind="attr: {href: manifestation.url}">
+                                    <span data-bind="text: manifestation.title"></span>
+                                </a>
+                            </strong>
+                            <div data-bind="html: manifestation.price"></div>
+
+                            <div class="product-item-inner">
+                                <div class="product actions product-item-actions-list-actions">
+                                    <div class="actions-primary actions-list-primary">
+                                        <!-- ko if: manifestation.is_available == 1 -->
+                                        <div class="stock available"><span>In stock</span></div>
+                                        <!-- /ko -->
+                                        <!-- ko if: manifestation.is_available == 0 -->
+                                        <div class="stock unavailable"><span>Out of stock</span></div>
+                                        <!-- /ko -->
+                                    </div>
+                                </div>
+                                <div class="product description product-item-description">
+                                    <b data-bind="text: manifestation.description"></b>
+                                    <a data-bind="attr: {href: manifestation.url, title: manifestation.title}"
+                                       class="action more">Learn More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+

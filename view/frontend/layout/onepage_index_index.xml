@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="onepage" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Smile\Onepage\Block\Onepage" name="manifestation.onepage.root" template="Smile_Onepage::onepage.phtml" cacheable="false">
+                <arguments>
+                    <argument name="jsLayout" xsi:type="array">
+                        <item name="types" xsi:type="array">
+                            <item name="form.input" xsi:type="array">
+                                <item name="component" xsi:type="string">Magento_Ui/js/form/element/abstract</item>
+                                <item name="config" xsi:type="array">
+                                    <item name="provider" xsi:type="string">manifestationProvider</item>
+                                    <item name="deps" xsi:type="array">
+                                        <item name="0" xsi:type="string">manifestationProvider</item>
+                                    </item>
+                                    <item name="template" xsi:type="string">ui/form/field</item>
+                                    <item name="elementTmpl" xsi:type="string">ui/form/element/input</item>
+                                </item>
+                            </item>
+                        </item>
+                        <item name="components" xsi:type="array">
+                            <item name="manifestation" xsi:type="array">
+                                <item name="component" xsi:type="string">uiComponent</item>
+                                <item name="config" xsi:type="array">
+                                    <item name="template" xsi:type="string">Smile_Onepage/onepage</item>
+                                </item>
+                                <item name="children" xsi:type="array">
+                                    <item name="errors" xsi:type="array">
+                                        <item name="sortOrder" xsi:type="string">0</item>
+                                        <item name="component" xsi:type="string">Magento_Ui/js/view/messages</item>
+                                        <item name="displayArea" xsi:type="string">messages</item>
+                                    </item>
+                                    <item name="authentication" xsi:type="array">
+                                        <item name="sortOrder" xsi:type="string">1</item>
+                                        <item name="component" xsi:type="string">Smile_Onepage/js/view/authentication</item>
+                                        <item name="displayArea" xsi:type="string">authentication</item>
+                                        <item name="children" xsi:type="array">
+                                            <!--Additional authentication fields-->
+                                            <item name="errors" xsi:type="array">
+                                                <item name="sortOrder" xsi:type="string">0</item>
+                                                <item name="component" xsi:type="string">Smile_Onepage/js/view/authentication-messages</item>
+                                                <item name="displayArea" xsi:type="string">messages</item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                    <item name="progressBar" xsi:type="array">
+                                        <item name="sortOrder" xsi:type="string">0</item>
+                                        <item name="component" xsi:type="string">Smile_Onepage/js/view/progress-bar</item>
+                                        <item name="displayArea" xsi:type="string">progressBar</item>
+                                        <item name="config" xsi:type="array">
+                                            <item name="deps" xsi:type="array">
+                                                <item name="0" xsi:type="string">manifestation.steps.manifestation-listing-step.manifestation-listing</item>
+                                                <item name="1" xsi:type="string">manifestation.steps.place-step.place</item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                    <item name="steps" xsi:type="array">
+                                        <item name="component" xsi:type="string">uiComponent</item>
+                                        <item name="displayArea" xsi:type="string">steps</item>
+                                        <item name="children" xsi:type="array">
+                                            <item name="manifestation-listing-step" xsi:type="array">
+                                                <item name="component" xsi:type="string">uiComponent</item>
+                                                <item name="sortOrder" xsi:type="string">10</item>
+                                                <item name="children" xsi:type="array">
+                                                    <item name="step-config" xsi:type="array">
+                                                        <item name="component" xsi:type="string">uiComponent</item>
+                                                        <item name="children" xsi:type="array">
+                                                            <item name="manifestation-listing-validation" xsi:type="array">
+                                                                <item name="children" xsi:type="array">
+                                                                    <!--Step configuration components-->
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                    <item name="manifestation-listing" xsi:type="array">
+                                                        <item name="config" xsi:type="array">
+                                                            <item name="deps" xsi:type="array">
+                                                                <item name="0" xsi:type="string">manifestation.steps.manifestation-listing-step.step-config</item>
+                                                                <item name="1" xsi:type="string">manifestationProvider</item>
+                                                            </item>
+                                                            <item name="popUpForm" xsi:type="array">
+                                                                <item name="element" xsi:type="string">#opc-manifestation-details</item>
+                                                                <item name="options" xsi:type="array">
+                                                                    <item name="type" xsi:type="string">popup</item>
+                                                                    <item name="responsive" xsi:type="boolean">true</item>
+                                                                    <item name="innerScroll" xsi:type="boolean">true</item>
+                                                                    <item name="title" xsi:type="string" translate="true">Manifestation Details</item>
+                                                                    <item name="trigger" xsi:type="string">opc-manifestation-details</item>
+                                                                    <item name="buttons" xsi:type="array">
+                                                                        <item name="save" xsi:type="array">
+                                                                            <item name="text" xsi:type="string" translate="true">Buy ticket</item>
+                                                                            <item name="class" xsi:type="string">action primary action-save-manifestation</item>
+                                                                        </item>
+                                                                        <item name="cancel" xsi:type="array">
+                                                                            <item name="text" xsi:type="string" translate="true">Cancel</item>
+                                                                            <item name="class" xsi:type="string">action secondary action-hide-popup</item>
+                                                                        </item>
+                                                                    </item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                        <item name="component" xsi:type="string">Smile_Onepage/js/view/manifestation-listing-step</item>
+                                                        <item name="provider" xsi:type="string">manifestationProvider</item>
+                                                        <item name="sortOrder" xsi:type="string">20</item>
+                                                        <item name="children" xsi:type="array">
+                                                            <item name="before-form" xsi:type="array">
+                                                                <item name="component" xsi:type="string">uiComponent</item>
+                                                                <item name="displayArea" xsi:type="string">before-form</item>
+                                                                <item name="children" xsi:type="array">
+                                                                    <!-- before form fields -->
+                                                                </item>
+                                                            </item>
+                                                            <item name="before-fields" xsi:type="array">
+                                                                <item name="component" xsi:type="string">uiComponent</item>
+                                                                <item name="displayArea" xsi:type="string">before-fields</item>
+                                                                <item name="children" xsi:type="array">
+                                                                    <!-- before fields -->
+                                                                </item>
+                                                            </item>
+                                                            <item name="manifestation-list" xsi:type="array">
+                                                                <item name="component" xsi:type="string">Smile_Onepage/js/view/manifestation-listing/list</item>
+                                                                <item name="displayArea" xsi:type="string">manifestation-list</item>
+                                                            </item>
+                                                            <item name="manifestation-list-additional" xsi:type="array">
+                                                                <item name="component" xsi:type="string">uiComponent</item>
+                                                                <item name="displayArea" xsi:type="string">manifestation-list-additional</item>
+                                                                <item name="children" xsi:type="array">
+                                                                    <!-- manifestation-list-additional -->
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                            </item>
+                                            <item name="place-step" xsi:type="array">
+                                                <item name="component" xsi:type="string">uiComponent</item>
+                                                <item name="sortOrder" xsi:type="string">20</item>
+                                                <item name="children" xsi:type="array">
+                                                    <item name="step-config" xsi:type="array">
+                                                        <item name="component" xsi:type="string">uiComponent</item>
+                                                        <item name="children" xsi:type="array">
+                                                            <item name="place-validation" xsi:type="array">
+                                                                <item name="children" xsi:type="array">
+                                                                    <!--Step configuration components-->
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                    <item name="place" xsi:type="array">
+                                                        <item name="config" xsi:type="array">
+                                                            <item name="deps" xsi:type="array">
+                                                                <item name="0" xsi:type="string">manifestation.steps.place-step.step-config</item>
+                                                                <item name="1" xsi:type="string">manifestationProvider</item>
+                                                            </item>
+                                                        </item>
+                                                        <item name="component" xsi:type="string">Smile_Onepage/js/view/place</item>
+                                                        <item name="provider" xsi:type="string">manifestationProvider</item>
+                                                        <item name="sortOrder" xsi:type="string">20</item>
+                                                        <item name="children" xsi:type="array">
+                                                            <item name="place-fieldset" xsi:type="array">
+                                                                <item name="component" xsi:type="string">uiComponent</item>
+                                                                <item name="config" xsi:type="array">
+                                                                    <item name="deps" xsi:type="array">
+                                                                        <item name="0" xsi:type="string">manifestationProvider</item>
+                                                                    </item>
+                                                                </item>
+                                                                <item name="displayArea" xsi:type="string">additional-fieldsets</item>
+                                                                <item name="children" xsi:type="array">
+                                                                    <item name="name" xsi:type="array">
+                                                                        <item name="sortOrder" xsi:type="string">100</item>
+                                                                    </item>
+                                                                    <item name="country_id" xsi:type="array">
+                                                                        <item name="sortOrder" xsi:type="string">110</item>
+                                                                    </item>
+                                                                    <item name="street" xsi:type="array">
+                                                                        <item name="sortOrder" xsi:type="string">120</item>
+                                                                    </item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                            <item name="manifestationProvider" xsi:type="array">
+                                <item name="component" xsi:type="string">uiComponent</item>
+                            </item>
+                        </item>
+                    </argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+        <referenceContainer name="page.messages" remove="true"/>
+    </body>
+</page>
